@@ -39,14 +39,8 @@ screen = pygame.display.set_mode(size)
 xdist, ydist = 0, 100
 angle, distance = 0, 100
 volume = 10
-fleft, fright = 5000, 5000
 filt = 1
- 
-# Volume slider
- 
-# slider = Slider(screen, 100, 100, 800, 40, min=0, max=99, step=1)
-# output = TextBox(screen, 475, 200, 50, 50, fontSize=30)
-# output.disable()  # Act as label instead of textbox
+
  
 # Initialize user text input
  
@@ -55,8 +49,6 @@ x_text = ''
 y_text = ''
 angle_text = ''
 dist_text = ''
-fleft_text = ''
-fright_text = ''
  
 # create rectangles
 main_rect = pygame.Rect(0, 36, WIDTH, HEIGHT-72)
@@ -64,8 +56,6 @@ x_in_rect = pygame.Rect(40, 0, textbox_width, 36)
 y_in_rect = pygame.Rect((WIDTH/num_textboxes) + 40, 0, textbox_width, 36)
 angle_in_rect = pygame.Rect(2*(WIDTH/num_textboxes) + 40, 0, textbox_width, 36)
 dist_in_rect = pygame.Rect(3*(WIDTH/num_textboxes) + 40, 0, textbox_width, 36)
-fleft_in_rect = pygame.Rect(40, HEIGHT - 36, textbox_width, 36)
-fright_in_rect = pygame.Rect((WIDTH/num_textboxes) + 40, HEIGHT - 36, textbox_width, 36)
  
 # color_active stores color which
 # gets active when input box is clicked by user
@@ -80,8 +70,6 @@ x_in_active = False
 y_in_active = False
 angle_in_active = False
 dist_in_active = False
-fleft_in_active = False
-fright_in_active = False
  
 # Draw circle for audio source
 source = pygame.draw.circle(screen, TEAL, [midx + xdist, midy - ydist], 10, 0)
@@ -89,7 +77,7 @@ source = pygame.draw.circle(screen, TEAL, [midx + xdist, midy - ydist], 10, 0)
 # Draw circle for person
 person = pygame.draw.circle(screen, RED, [midx, midy], 20, 0)
 
-
+# Draw filter toggle button
 filter_toggle = pygame.draw.circle(screen, GREEN, [WIDTH-18, HEIGHT-36+18], 10, 0)
  
 throttle = 0
@@ -117,8 +105,8 @@ def getAngle(x, y): # -180 to 180, with 0 being x=0, y>0
     return int(rad*180/math.pi)
  
 def drawUpdate():
-    global x_text, y_text, angle_text, dist_text, fleft_text, fright_text
-    global x_in_rect, y_in_rect, angle_in_rect, dist_in_rect, fleft_in_rect, fright_in_rect
+    global x_text, y_text, angle_text, dist_text
+    global x_in_rect, y_in_rect, angle_in_rect, dist_in_rect
     global filt
  
     screen.fill(DARKGREY)
@@ -128,8 +116,6 @@ def drawUpdate():
     pygame.draw.circle(screen, GREY, [midx, midy], 300, 2)
     pygame.draw.circle(screen, GREY, [midx, midy], 400, 2)
     pygame.draw.circle(screen, GREY, [midx, midy], 500, 2)
- 
-    # pygame.draw.line(screen, WHITE, [0, 38], [800, 38], 2)
  
     # Person and Source
     pygame.draw.line(screen, WHITE, [person.centerx, person.centery], [source.centerx, source.centery], 2)
@@ -143,7 +129,6 @@ def drawUpdate():
     pygame.draw.rect(screen, DARKGREY, [0, HEIGHT - 36, WIDTH, 36], 0)
     pygame.draw.line(screen, WHITE, [0, HEIGHT - 38], [WIDTH, HEIGHT-38], 2)
  
- 
     # Text
     font = pygame.font.Font(None, 28)
     textx = font.render(f"x: ", 1, WHITE)
@@ -154,8 +139,6 @@ def drawUpdate():
     texton = font.render(f"FILTER ON: ", 1, WHITE)
     textr = font.render(f"R", 1, WHITE)
     textl = font.render(f"L", 1, WHITE)
-    textfleft = font.render(f"fl: ", 1, WHITE)
-    textfright = font.render(f"fr: ", 1, WHITE)
     screen.blit(textx, (10, 10))
     screen.blit(texty, ((WIDTH/num_textboxes) + 10, 10))
     screen.blit(textangle, (2*(WIDTH/num_textboxes) + 10, 10))
@@ -164,13 +147,10 @@ def drawUpdate():
     screen.blit(texton, (WIDTH - 150, HEIGHT-36+10))
     screen.blit(textl, (10, HEIGHT/2 - 16))
     screen.blit(textr, (WIDTH - 25, HEIGHT/2 - 16))
-    # screen.blit(textfleft, (10, HEIGHT-36+10))
-    # screen.blit(textfright, ((WIDTH/num_textboxes) + 10, HEIGHT-36+10))
  
     # Draw user input boxes
  
     x_in_color, y_in_color, angle_in_color, dist_in_color = (color_passive, color_passive, color_passive, color_passive)
-    fleft_in_color, fright_in_color = (color_passive, color_passive)
  
     if x_in_active:
         x_in_color = color_active
@@ -191,18 +171,6 @@ def drawUpdate():
         dist_in_color = color_active
     else:
         dist_text = str(distance)
- 
-    if fleft_in_active:
-        fleft_in_color = color_active
-    else:
-        fleft_text = str(fleft)
- 
-    if fright_in_active:
-        fright_in_color = color_active
-    else:
-        fright_text = str(fright)
- 
- 
        
     # draw rectangle and argument passed which should
     # be on screen
@@ -210,37 +178,22 @@ def drawUpdate():
     pygame.draw.rect(screen, y_in_color, y_in_rect)
     pygame.draw.rect(screen, angle_in_color, angle_in_rect)
     pygame.draw.rect(screen, dist_in_color, dist_in_rect)
-    # pygame.draw.rect(screen, fleft_in_color, fleft_in_rect)
-    # pygame.draw.rect(screen, fright_in_color, fright_in_rect)
  
     x_text_surface = font.render(x_text, 1, WHITE)
     y_text_surface = font.render(y_text, 1, WHITE)
     angle_text_surface = font.render(angle_text, 1, WHITE)
     dist_text_surface = font.render(dist_text, 1, WHITE)
-    fleft_text_surface = font.render(fleft_text, 1, WHITE)
-    fright_text_surface = font.render(fright_text, 1, WHITE)
    
     # render at position stated in arguments
     screen.blit(x_text_surface, (x_in_rect.x+10, x_in_rect.y+10))
     screen.blit(y_text_surface, (y_in_rect.x+10, y_in_rect.y+10))
     screen.blit(angle_text_surface, (angle_in_rect.x+10, angle_in_rect.y+10))
     screen.blit(dist_text_surface, (dist_in_rect.x+10, dist_in_rect.y+10))
-    # screen.blit(fleft_text_surface, (fleft_in_rect.x+10, fleft_in_rect.y+10))
-    # screen.blit(fright_text_surface, (fright_in_rect.x+10, fright_in_rect.y+10))
 
     if filt==1:
         pygame.draw.circle(screen, GREEN, filter_toggle.center, 10, 0)
     else:
         pygame.draw.circle(screen, DARK_RED, filter_toggle.center, 10, 0)
- 
-   
-    # set width of textfield so that text cannot get
-    # outside of user's text input
-    #input_rect.w = max(100, text_surface.get_width()+10)
- 
-    # output.setText(slider.getValue())
- 
-    # pygame_widgets.update(event)
  
     # Update screen after drawing
     pygame.display.flip()
@@ -249,14 +202,13 @@ def drawUpdate():
 def handleEvent(event):
     global moving, dist_locked, dist_locked_num
     global filt
-    global x_in_active, y_in_active, angle_in_active, dist_in_active, fleft_in_active, fright_in_active
-    global x_text, y_text, angle_text, dist_text, fleft_text, fright_text
-    global volume, distance, fleft, fright
- 
+    global x_in_active, y_in_active, angle_in_active, dist_in_active
+    global x_text, y_text, angle_text, dist_text
+    global volume, distance
+    
     if event.type == MOUSEBUTTONDOWN:
         if event.button == 1:
             x_in_active, y_in_active, angle_in_active, dist_in_active = False, False, False, False
-            fleft_in_active, fright_in_active = False, False
             if source.collidepoint(event.pos):
                 moving = True
             elif main_rect.collidepoint(event.pos):
@@ -273,10 +225,6 @@ def handleEvent(event):
                 angle_in_active = True
             elif dist_in_rect.collidepoint(event.pos):
                 dist_in_active = True
-            elif fleft_in_rect.collidepoint(event.pos):
-                fleft_in_active = True
-            elif fright_in_rect.collidepoint(event.pos):
-                fright_in_active = True
  
         elif event.button == 4:
             #SCROLL UP, ZOOM IN
@@ -329,8 +277,6 @@ def handleEvent(event):
         elif y_in_active: user_in_text = y_text
         elif angle_in_active: user_in_text = angle_text
         elif dist_in_active: user_in_text = dist_text
-        elif fleft_in_active: user_in_text = fleft_text
-        elif fright_in_active: user_in_text = fright_text
  
         # Check for backspace
         if event.key == pygame.K_BACKSPACE:
@@ -392,19 +338,6 @@ def handleEvent(event):
  
                 except: offset = (0, 0)
                 source.move_ip(offset)
-               
- 
-        elif fleft_in_active:
-            fleft_text = user_in_text
-            if value_entered:
-                fleft_text = user_in_text[:-1]
-                fleft = int(fleft_text)
- 
-        elif fright_in_active:
-            fright_text = user_in_text
-            if value_entered:
-                fright_text = user_in_text[:-1]
-                fright = int(fright_text)
  
     else: print(event)
  
@@ -442,9 +375,6 @@ with serial.Serial('COM3',115200) as ser:
             distance = int(math.sqrt(xdist**2 + ydist**2))
             dist_l = int(math.sqrt((xdist+10)**2 + ydist**2))
             dist_r = int(math.sqrt((xdist-10)**2 + ydist**2))
- 
-            fleft_scaled = int(fleft / 5000 * 1024)
-            fright_scaled = int(fright / 5000 * 1024)
 
             angle_l = math.atan2(-(xdist+10), ydist)
             angle_r = math.atan2(-(xdist-10), ydist)
@@ -457,12 +387,8 @@ with serial.Serial('COM3',115200) as ser:
  
             ser.flush()
             ser.write(bytes(f"x{xdist}y{ydist}v{volume}a{angle}f{filt}l{left_amp}r{right_amp}\r", 'utf-8'))
-            #ser.write(bytes(f"x{xdist}y{ydist}v{volume}a{angle}f{filt}l{fleft_scaled}r{fright_scaled}\r", 'utf-8'))
-            #print(f"x: {xdist}, y: {ydist}, v: {volume}, a: {angle}, f: {filt}, l: {fleft}, r: {fright}")
+            #print(f"x: {xdist}, y: {ydist}, v: {volume}, a: {angle}, f: {filt}, l: {left_amp}, r: {right_amp}")
             throttle = 0
- 
-            # userInput = parseInput(ser)
-            # print(userInput)
  
         drawUpdate()
  
